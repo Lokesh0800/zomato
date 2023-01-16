@@ -1,0 +1,206 @@
+{% extends 'base.html' %}
+    {% block style_block %}
+    <link rel="stylesheet" href="/static/bootstrap.css">
+    <style>
+      input.radiobtn:checked + label.radiobtn {
+        color: brown;
+        padding: 2px;
+      }
+
+      .clearbtn{
+        text-decoration: none;
+      }
+
+      .clearbtn:link {
+        color:#040404;
+      }
+      .clearbtn:visited {color:#0000ff;}
+      .clearbtn:hover{
+        text-decoration: underline;
+        color: brown;
+        
+      }
+
+    </style>
+    {% endblock %}
+  </head>
+  <body style="background-color:rgba(232, 213, 213, 0.432)">
+    {% block body_block %}
+    
+    {% for message in messages %}
+<div class="alert alert-{{message.tags}} mb-1 alert-dismissible fade show" role="alert">
+  <strong>Message!</strong> {{message}}
+  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+{% endfor %}
+
+
+    <div style="margin-left: 100px;
+    margin-right: 100px;
+    margin-top: 10px;
+    margin-bottom: 10px;">
+   
+    <input type="hidden" name="addressalert"/>
+<label for="addressalert"  id="addressalert"></label>
+<div class="row">
+  <div class="col" >
+    <div  style="background-color: white; width: 100%;border-radius: 25px; box-shadow:8px 8px rgba(48, 47, 47, 0.405)">
+      <div style="padding: 10px 10px 0px 10px">
+      <h2 class="mb-0" id="mycart">My Cart (<span id="cartqty"></span>)</h2>
+      <a href="checkout" class="anchorbtn" >
+        <button class="btn btn-link clearbtn m-0 p-0" onclick="clearCart()" id="clearCart">
+        Delete all Cart items
+       </button>
+    </a>
+      <hr style="margin: 10px 0px 0px 0px;padding: 10px 5px 10px 5px">
+      </div>
+    <form action="{% url 'checkout' %}" method="post" style="padding:3px 10px 10px 10px">
+      {% csrf_token %}
+      <div id="cartheader" ></div>
+      <div id="listid"></div>
+      <input type="hidden" name="itemsJson" id="itemsJson" />
+      <input type="hidden" name="addressJson" id="addressJson" />
+      <input type="hidden" name="total" id="total" />
+      <div id="orderbtn" style="display: flex;  
+      justify-content: right; padding: 10px 5px 5px 0px">
+      <button type="submit" class="btn btn-primary" style="width:30% ;" onclick="clearCart()" >ORDER</button>
+    </div>
+    </form>
+    </div>
+    <br/>
+    
+    <input type="hidden" name="showaddress"/>
+    <label for="showaddress"  id="showaddress"></label>
+  </div>
+  <div class="col">
+    <div style="background-color: white; width: 100%;width: 100%;border-radius: 25px; box-shadow:8px 8px rgba(48, 47, 47, 0.405)">
+    <div class="p-2">
+      <h3>Deliver to: <span id="addressid" ></span></h3>
+    </div>
+  </div>
+</div>
+</div>
+  {% endblock %}
+
+  {% block script_block %}
+
+    <script>
+      var username = document.getElementById('uname').innerHTML
+      console.log(username);
+      
+      if (localStorage.getItem("cart"+username) == null) {
+        var cart = {}; 
+      } 
+      else {
+        cart = JSON.parse(localStorage.getItem("cart"+username));
+        console.log(cart);
+      }
+      
+      $(".radiocls").on("click", "input.checkbtn", function () {
+        address={};
+        var idstr = this.id.toString();
+        intid = this.id.slice(7,);
+        if (address[idstr] != undefined) {
+        } else {  
+          if ($(".checkbtn").is(":checked")){
+          add = document.getElementById('add'+idstr).innerHTML;
+          address[idstr] = add;
+          localStorage.setItem('address'+username,JSON.stringify(address));
+          document.getElementById('result').innerHTML = 
+          'Deliver to '+ username + ' pincode- ' +address[idstr].slice(-6); 
+          fun() 
+           }
+           else{
+            addressalert();
+            document.getElementById('result').innerHTML = 
+            `Select Delivery address for ${username}`
+            localStorage.removeItem('address'+username);
+           }
+          //updateaddress(addcart);
+        }
+        // document.getElementById("result").innerHTML = idstr.value;
+      });
+      
+      if (localStorage.getItem('address' + username) != null)  { 
+          address = JSON.parse(localStorage.getItem("address"+username));
+          for (i in address){
+            document.getElementById('result').innerHTML = 
+              'Deliver to '+ username + ' pincode- ' +address[i].slice(-6); 
+          }
+          fun();
+      }
+      else{
+        address = JSON.parse(localStorage.getItem("address"+username));
+      
+      }
+
+    function addressalert(){
+      document.getElementById('addressalert').innerHTML = '<b style="color:red">Delivery address is not selected. Please select address</b>'
+    }
+
+    function fun(){
+      for (add in address){
+        newadd = address[add];
+      }
+      document.getElementById('addressid').innerHTML = '<h6><b>'+ newadd + '</b></h6>'
+      $("#addressJson").val(JSON.stringify(newadd));
+    }
+      var totalqty = 0;
+      var totalprice = 0;
+      var OrderBtn = document.getElementById("orderbtn");
+      if ($.isEmptyObject(cart)) {
+        //if object is empty
+        mystr = `<p>Your cart is empty, please add some items to your cart before checking out!</p>`;
+        OrderBtn.style.display = "none";
+        $("#listid").append(mystr);
+      } else {
+        OrderBtn.style.display = "block";
+        cartlen = Object.keys(cart).length
+        document.getElementById('cartqty').innerHTML = cartlen
+        document.getElementById('cart'+ username).innerHTML = cartlen;
+        for (items in cart) {
+        
+          let name = cart[items][1];
+          let qty = cart[items][0];
+          let price = cart[items][2];
+          let img = cart[items][4];
+          let sum = price * qty;
+          totalprice = totalprice + sum;
+          totalqty = totalqty + qty;
+          dynamicHtml1 = 
+          `<div class='row'>
+            <div class='col col-sm-2'>
+              <img src=${img} width='100%' alt='...' />
+                 </div>
+            <div class='col '>
+              <h3 id='name'> ${name} </h3>
+              <h6>&#8377 ${price} x ${qty} = &#8377 ${sum} 
+            <span class='divpr mx-4' style='display: flex;  
+            justify-content: right;'>Qty: ${qty}</span>
+              </div>
+            </div>
+            <hr style="margin: 10px 0px 0px 0px;padding: 10px 5px 10px 5px"/>`;
+          $("#listid").append(dynamicHtml1);
+        }
+        dynamicHtml2 = `<div style='display: flex;  
+        justify-content: right; font-size:1.5em;'> <b>Cart Price (${cartlen} items):&#8377 <span > ${totalprice}</span></b></div>`;
+        $("#listid").append(dynamicHtml2);
+        $("#total").val(JSON.stringify(totalprice));
+      }
+  
+      $("#total").val(JSON.stringify(totalprice));
+      $("#itemsJson").val(JSON.stringify(cart));
+
+      function clearCart() {
+
+        if (address){
+        localStorage.removeItem('cart'+username);
+        localStorage.removeItem('address'+username);
+        }
+        else{
+          ;
+        }
+      }
+      
+    </script>
+    {% endblock %}

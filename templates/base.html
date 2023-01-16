@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Document</title>
+  <link rel="stylesheet" href="/static/bootstrap.min.css" />
+
+  <style> 
+    input.checkbtn:checked + label.radiobtn {
+      color: brown;
+      padding: 2px;
+    }
+    .dropbtn:hover{
+      background-color: gray;
+    }
+
+    .home:hover{
+      color: brown;
+     border: 1px solid white;
+     padding: 5px;
+    }
+
+  </style>
+  {% block style_block %}  {% endblock %}
+</head>
+
+<body style="background-color:rgba(36, 158, 116, 0.458) ;">
+
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark ">
+    <div class="container-fluid">
+      <a class="navbar-brand home" href="userpage" >Mom's Recipe</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
+        aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" style="position:absolute;right:100px" id="navbarSupportedContent">
+        <button
+      type="button"
+      class="btn"
+      style="align-items: left;"
+      data-toggle="modal"
+      data-target="#exampleModalCenter"
+    >
+      <span id="result" style="color:White ;" >Select Delivery address for {{user.username}}
+      </span>
+    </button>
+        <div class="dropdown" style="padding:0px 50px 0px 10px; margin-right:10px;">
+          <button style="color:White;" class="btn  dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            Welcome <strong id="uname">{{user.username}}</strong>
+          </button>
+          <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+            <button type="button" class="dropdown-item" data-toggle="modal" data-target="#address">
+     Manage Address
+    </button>
+    <a href="order" style="text-decoration: none;">
+    <button type="button" class="dropdown-item" data-toggle="modal" data-target="#order">
+      My Orders
+     </button>
+    </a>
+            <a class="dropdown-item" href="{% url 'logouthandle' %}">Logout</a>
+          </div>
+        </div>
+      </div>
+      <button type="button" class="btn btn-secondary mx-2 cartbtn"  id="popcart" data-container="body" data-toggle="popover" data-placement="bottom" data-html="true">
+        <span style="font-size: 1.2rem;"><span class="mx-2"><img src="/media/items/logo/shopping-cart (1).png" alt="" ></span>Cart(<span id="cart{{user.username}}" name="cart">0</span>)</span> 
+      </button>
+    </div>
+  </nav>
+
+  <div id="mssg" style="text-align: center;" ></div>
+  <!-- Manage Address Modal-->
+  <div class="modal fade" id="address" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="staticBackdropLabel">Address</h5>
+          <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close">
+          </button>
+        </div>
+        <div class="modal-body">
+          <form action="userpage" method="post">
+            {% csrf_token %}
+            <div class="modal-body">
+              <div class="mb-2">
+                <input
+                  name="house"
+                  type="text"
+                  class="form-control my-2 restrictsymbol"
+                  id="formGroupExampleInput"
+                  placeholder="House number"
+                  required
+                />
+
+                <input
+                  name="street"
+                  type="text"
+                  class="form-control my-2 restrictsymbol"
+                  id="formGroupExampleInput"
+                  placeholder="Street number"
+                  required
+                />
+
+                <input
+                  name="locality"
+                  type="text"
+                  class="form-control my-2 restrictsymbol"
+                  id="formGroupExampleInput"
+                  placeholder="Locality"
+                  required
+                />
+
+                <input
+                  name="city"
+                  type="text"
+                  class="form-control my-2 restrictsymbol"
+                  id="formGroupExampleInput"
+                  placeholder="City"
+                  required
+                />
+
+                <input
+                  name="zip"
+                  type="text"
+                  class="form-control my-2 restrictsymbol"
+                  id="formGroupExampleInput"
+                  placeholder="Zip code"
+                  required
+                />
+              </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Add</button>
+        </div>
+      </form>
+      </div>
+    </div>
+  </div>
+  </div>
+  
+  {% block body_block %}
+  {% endblock %}
+
+  <!-- Address Modal-->
+  <div
+  class="modal fade"
+  id="exampleModalCenter"
+  tabindex="-1"
+  role="dialog"
+  aria-labelledby="exampleModalCenterTitle"
+  aria-hidden="true"
+>
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLongTitle">
+          Select delivery location
+        </h5>
+        <button
+          type="button"
+          class="close"
+          data-dismiss="modal"
+          aria-label="Close"
+        >
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <ol>
+          {% for add in myaddress %}
+          <div class="radiocls">
+            <li>
+              <input
+                type="radio"
+                id="address{{add.id}}"
+                name="selectaddress"
+                class="btn checkbtn"
+                style="visibility: hidden; cursor: pointer"
+              />
+              <label
+                for="address{{add.id}}"
+                style="cursor: pointer"
+                class="radiobtn"
+              >
+                <strong id="addaddress{{add.id}}">{{add.house}},{{add.street_no}},{{add.locality}},{{add.city}},{{add.pincode}}</strong>
+              </label>
+            </li>
+          </div>
+          <hr style="margin: 5px; padding: 5px" />
+          {% endfor %}
+        </ol>
+      </div>
+      <div class="modal-footer">
+        <button
+          type="button"
+          class="btn btn-secondary"
+          data-dismiss="modal"
+        >
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+{% block footer_block %}
+  {% endblock %}
+
+  
+  <!-- <script src="/static/js/jquery.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js" integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut" crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js" integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k" crossorigin="anonymous"></script> -->
+
+  <script src="/static/js/jquery.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js" integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut" crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js" integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k" crossorigin="anonymous"></script>
+  <script src="/static/js/bootstrap.js"></script>
+
+<!-- <script>
+    $(".carousel").carousel({
+      interval: false,
+    });
+// To get Current username
+  var username = document.getElementById('uname').innerHTML;
+
+// Store data in localstorage
+  if (localStorage.getItem('cart' + username) == null)  {
+    var cart = {};
+
+} else {
+    cart = JSON.parse(localStorage.getItem('cart' + username));
+    updateCart(cart);
+}
+
+if (localStorage.getItem('address' + username) == null)  {
+  var address={};
+}
+
+$('.cartbtn').on('click',function(){
+if (localStorage.getItem('address'+username) == null){
+  document.getElementById('mssg').innerHTML = '<h6 style="color:red"> Please Select Delivery Address To Proceed </h6>'
+  setTimeout(function() {
+    document.getElementById('mssg').innerHTML = ''
+}, 3000); 
+}
+else{
+  console.log(cart['cart'+ username]);
+  location.href = 'checkout';
+}
+});
+
+// To restrict characters and symbol in Address form
+$('.restrictsymbol').bind('input', function() {
+var c = this.selectionStart,
+    r = /[^a-z0-9 / -]/gi,
+    v = $(this).val();
+if(r.test(v)) {
+  $(this).val(v.replace(r, ''));
+  c--;
+}
+this.setSelectionRange(c, c);
+});
+
+// If the add to cart button is clicked, add/increment the item
+//$('.cart').click(function() {
+  $('.divpr').on('click', 'button.cart',function() {
+    var idstr = this.id.toString();
+    if (cart[idstr] != undefined) {
+        qty = cart[idstr][0] + 1;
+        //cart[idstr] = [{'qty':qty,'name':name,'price':price,'prid':prid}];
+        cart[idstr] = [qty,name,price,prid,img];
+    } else {
+      img = document.getElementById('image'+idstr).getAttribute('src');
+      console.log(img);
+        qty =  1;
+        prid = parseInt(idstr.slice(2,));
+        name = document.getElementById('name'+idstr).innerHTML;
+        price = document.getElementById('price'+idstr).innerHTML;
+        cart[idstr] = [qty,name,price,prid,img];
+    }
+    updateCart(cart); 
+});
+
+/*function updatePopover(cart){
+  var popStr = "";
+  popStr = popStr + "<h5> Cart for your items in my shopping cart </h5><div class='mx-2 my-2'>";
+  var i = 1;
+  for (var item in cart){
+      popStr = popStr + "<b>" + i + "</b>. ";
+      popStr = popStr + document.getElementById('name' + item).innerHTML.slice(0, 19) + "... Qty: " + cart[item][0] + '<br>';
+      i = i+1;
+  }
+  popStr = popStr + "</div><button class='btn btn-primary' onclick='clearCart()' id ='clearCart'>Clear Cart</button><a href=''><button class='btn btn-primary' id ='checkout'>Checkout</button></a>     "
+  document.getElementById('popcart').setAttribute('data-content', popStr);
+  //$('#popcart').popover('show');
+}*/
+
+function updateCart(cart) {
+  var sum=0;
+  cartlen = Object.keys(cart).length
+  console.log(cart);
+    for (var item in cart) {
+      sum =  sum+cart[item][0];
+      document.getElementById('div' + item).innerHTML = "<button id='minus" + item + "' class='btn btn-primary minus'>-</button> <span id='val" + item + "''>" + cart[item][0] + "</span> <button id='plus" + item + "' class='btn btn-primary plus'> + </button>";
+    }
+    localStorage.setItem('cart'+ username, JSON.stringify(cart));
+    document.getElementById('cart'+ username).innerHTML = cartlen;
+    //updatePopover(cart);
+}
+
+function updateAddress(address) {
+    localStorage.setItem('address'+ username, JSON.stringify(address));
+    
+    //updatePopover(cart);
+}
+// If plus or minus button is clicked, change the cart as well as the display value
+$('.divpr').on("click", "button.minus", function() {
+    a = this.id.slice(7 , );
+    cart['pr' + a][0] = cart['pr' + a][0] - 1;
+    cart['pr' + a][0] = Math.max(0, cart['pr' + a][0]);
+ 
+    if (cart['pr' + a][0] == 0){
+      document.getElementById('divpr' + a).innerHTML = '<button id="pr' + a + '" class="btn btn-primary cart">Add to cart</button>'
+      delete cart['pr'+a];
+    }
+    else{
+      document.getElementById('valpr' + a).innerHTML = ['pr' + a][0]
+    }
+    updateCart(cart);
+});
+
+$('.divpr').on("click", "button.plus", function() {
+    a = this.id.slice(6, );
+    cart['pr' + a][0] = cart['pr' + a][0] + 1;
+    document.getElementById('valpr' + a).innerHTML = cart['pr' + a][0];
+    updateCart(cart);
+});
+
+$(".radiocls").on("click", "input.checkbtn", function () {
+  address={};
+  var idstr = this.id.toString();
+  console.log(idstr);
+  intid = this.id.slice(7,);
+  if (address[idstr] != undefined) {
+  } else {  
+     if ($(".checkbtn").is(":checked")){
+    add = document.getElementById('add'+idstr).innerHTML;
+    address[idstr] = add;
+    console.log(address);
+    localStorage.setItem('address'+username,JSON.stringify(address));
+    document.getElementById('result').innerHTML = 
+    'Deliver to '+ username + ' pincode- ' +address[idstr].slice(-6);  
+     }
+     else{
+      document.getElementById('result').innerHTML = 
+      `Select Delivery address for ${username}`
+      localStorage.removeItem('address'+username);
+     }
+    //updateaddress(addcart);
+  }
+  // document.getElementById("result").innerHTML = idstr.value;
+});
+</script>   -->
+
+  {% block script_block %} 
+  
+  {% endblock %}
+</body>
+</html>
