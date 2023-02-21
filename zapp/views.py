@@ -24,28 +24,21 @@ def send_otp_tophone(request):
         otp=''
         try:
             User.objects.get(phone_number=phone)
-            print('a')
             #msg = messages.error(request, 'Phone number already registered')            
             return HttpResponse("mob_exist")
         except:
             try:
                 User.objects.get(username=username)
-                print('b')
                 #msg = messages.error(request, 'Username already registered')
                 return HttpResponse("user_exist")
             except:
                 try:
                     User.objects.get(email=email)
-                    print('c')
                     #msg = messages.error(request, 'Email already registered')
                     return HttpResponse("email_exist")
                 except:
                     mob = request.POST['phone']
-                    print(mob)
-                    print('d')
-                    otp =  random.randint(1000,9999)
-                    print(otp)
-                    print('OTP sent')   
+                    otp =  random.randint(1000,9999) 
                     #url = f'https://2factor.in/API/V1/254860ba-68b0-11ed-9c12-0200cd936042/SMS/{mob}/{otp}/'
                     #response = requests.get(url)
                     #msg = messages.success(request, 'User successfully registered')
