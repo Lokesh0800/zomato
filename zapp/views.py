@@ -39,6 +39,7 @@ def send_otp_tophone(request):
                 except:
                     mob = request.POST['phone']
                     otp =  random.randint(1000,9999) 
+                    print(otp)
                     #url = f'https://2factor.in/API/V1/254860ba-68b0-11ed-9c12-0200cd936042/SMS/{mob}/{otp}/'
                     #response = requests.get(url)
                     #msg = messages.success(request, 'User successfully registered')
