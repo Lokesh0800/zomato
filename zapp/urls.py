@@ -10,7 +10,7 @@ urlpatterns = [
     path('order',views.orderpage,name='orderpage'),
     path('checkout',views.checkout,name='checkout'),
     path('google_mapp',views.google_mapp,name='google_mapp'),
-    path('send_otp_tophone',views.send_otp_tophone,name='send_otp_tophone'),  
-    
+    path('send_otp_tophone',views.send_otp_tophone,name='send_otp_tophone'),
+    path('payment-success',views.success,name='success')    
 ]
 

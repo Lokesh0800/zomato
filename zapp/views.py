@@ -12,8 +12,11 @@ from django.conf import settings
 from .models import User
 from .custauthuser import authenticate
 from Restaurant.models import RestAddress,Menuitems,FoodCategory
-
+from django.core.cache import cache
 #User = settings.AUTH_USER_MODEL     
+
+import razorpay
+client = razorpay.Client(auth=("rzp_test_rDtwfUqiUhaeKV", "AyRnHdonLtSRrcAAoGC6d025"))
 
 # Create your views here.
 
@@ -45,7 +48,9 @@ def send_otp_tophone(request):
                     #msg = messages.success(request, 'User successfully registered')
                     return HttpResponse(otp)
 
+
 def homepage(request):  
+    
     Address = RestAddress.objects.all()
     if request.method == 'POST':
         username = request.POST.get("username")
@@ -181,6 +186,7 @@ def checkout(request):
         myuser = request.user.get_username()
         userobj = User.objects.get(phone_number=myuser)
         address = UserAddress.objects.filter(user=userobj)
+        
         if request.method == 'POST':
             orderitem = json.loads((request.POST.get("itemsJson")))
             useradd = json.loads((request.POST.get("addressJson")))
@@ -188,8 +194,11 @@ def checkout(request):
             myorder = Order.objects.create(useraddress=useradd, items=orderitem,totalprice=total)
             myorder.username = request.user
             myorder.save()  
+            data = { "amount": total, "currency": "INR", "receipt": "order_rcptid_11" }
+            payment = client.order.create(data=data)
+            url = "http://127.0.0.1:8000/home  "
             msg = messages.success(request, 'Order Placed')
-            return HttpResponseRedirect('userpage', {'address': useradd, 'user': userobj,'message': msg})
+            return HttpResponseRedirect('userpage', {'address': useradd, 'user': userobj,'message': msg,"callback_url":url})
         else:
             return render(request, 'checkout.html', {'myaddress': address})
     except:
@@ -198,3 +207,6 @@ def checkout(request):
 
 def google_mapp(request):
     return render(request,'mapp.html')
+
+def success(request):
+    return render(request,'success.html')
